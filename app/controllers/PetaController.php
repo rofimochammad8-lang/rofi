@@ -17,6 +17,20 @@ switch ($act) {
     case 'index':
         // Ambil semua tahun untuk filter dropdown
         $semua_tahun = mysqli_query($conn, "SELECT * FROM tahun ORDER BY tahun DESC");
+        $semua_bulan = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
 
         // Total semua posyandu (selalu tetap)
         $total_semua_posyandu = mysqli_fetch_assoc(
@@ -25,6 +39,7 @@ switch ($act) {
 
         // ID tahun aktif dari URL
         $id_tahun_aktif = isset($_GET['id_tahun']) ? $_GET['id_tahun'] : '';
+        $bulan_aktif = isset($_GET['bulan']) ? (int) $_GET['bulan'] : '';
 
         require_once ROOT . '/app/views/peta/index.php';
         break;
@@ -37,16 +52,15 @@ switch ($act) {
         header('Content-Type: application/json');
 
         $id_tahun = isset($_GET['id_tahun']) ? $_GET['id_tahun'] : '';
+        $bulan = isset($_GET['bulan']) ? (int) $_GET['bulan'] : '';
 
-        // Filter tahun jika dipilih
-        $filter_tahun_sql = $id_tahun
-            ? "AND b.id_tahun = '" . mysqli_real_escape_string($conn, $id_tahun) . "'"
-            : '';
-
-        // Ambil data tiap posyandu beserta jumlah per status gizi
-        $join_tahun = $id_tahun
-            ? "AND b.id_tahun = '" . mysqli_real_escape_string($conn, $id_tahun) . "'"
-            : "";
+        $join_filter = '';
+        if ($id_tahun) {
+            $join_filter .= " AND b.id_tahun = '" . mysqli_real_escape_string($conn, $id_tahun) . "'";
+        }
+        if ($bulan >= 1 && $bulan <= 12) {
+            $join_filter .= " AND b.bulan_pencatatan = '" . mysqli_real_escape_string($conn, (string) $bulan) . "'";
+        }
 
         $query = "SELECT
                     p.id,
@@ -59,7 +73,7 @@ switch ($act) {
                     SUM(CASE WHEN b.status_gizi = 'normal'   THEN 1 ELSE 0 END) as jml_normal,
                     SUM(CASE WHEN b.id IS NOT NULL THEN 1 ELSE 0 END) as total_balita
                   FROM posyandu p
-                  LEFT JOIN balita b ON p.id = b.id_posyandu $join_tahun
+                  LEFT JOIN balita b ON p.id = b.id_posyandu $join_filter
                   GROUP BY p.id, p.nama_posyandu, p.nama_dusun, p.koordinat_lat, p.koordinat_lng
                   ORDER BY p.nama_posyandu";
 

@@ -34,6 +34,7 @@ $filter_aktif = !empty($filter_tahun);
             'edit_sukses'      => ['success', 'Data balita berhasil diperbarui!'],
             'hapus_sukses'     => ['success', 'Data balita berhasil dihapus!'],
             'tidak_bisa_hapus' => ['warning', 'Tidak bisa hapus, data sudah ada di stunting!'],
+            'invalid_input'    => ['warning', $_GET['error'] ?? 'Semua indikator wajib diisi dengan benar.'],
             'gagal'            => ['danger',  'Terjadi kesalahan, coba lagi!'],
         ];
         $msg = $_GET['msg'];
@@ -47,6 +48,14 @@ $filter_aktif = !empty($filter_tahun);
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         <?php endif; ?>
+        <?php endif; ?>
+
+        <?php if (!empty($total_revisi) && $total_revisi > 0): ?>
+        <div class="alert mb-4"
+             style="background:#fff8e1;border:1px solid #ffe082;border-radius:10px;color:#b8860b;">
+            <i class="bi bi-exclamation-circle-fill me-2"></i>
+            Ada <strong><?= $total_revisi ?> data</strong> yang perlu direvisi. Periksa catatan pada tabel lalu edit data balita terkait.
+        </div>
         <?php endif; ?>
 
         <!-- ===== FILTER TAHUN + FORM TAMBAH ===== -->
@@ -110,6 +119,12 @@ $filter_aktif = !empty($filter_tahun);
                     </div>
 
                     <div class="col-md-3">
+                        <label class="form-label">NIK Orang Tua</label>
+                        <input type="text" name="nik_ortu" class="form-control"
+                               placeholder="Nomor Induk Kependudukan" required>
+                    </div>
+
+                    <div class="col-md-3">
                         <label class="form-label">Tanggal Lahir</label>
                         <input type="date" name="tanggal_lahir" id="tgl_lahir"
                                class="form-control" onchange="hitungUmur()" required>
@@ -146,13 +161,13 @@ $filter_aktif = !empty($filter_tahun);
                     <div class="col-md-2">
                         <label class="form-label">Lkr. Kepala (cm)</label>
                         <input type="number" step="0.1" name="lingkar_kepala"
-                               class="form-control" placeholder="42.0">
+                               class="form-control" placeholder="42.0" min="0.1" required>
                     </div>
 
                     <div class="col-md-2">
                         <label class="form-label">Lkr. Lengan (cm)</label>
                         <input type="number" step="0.1" name="lingkar_lengan"
-                               class="form-control" placeholder="14.0">
+                               class="form-control" placeholder="14.0" min="0.1" required>
                     </div>
 
                     <div class="col-md-2">
@@ -174,6 +189,12 @@ $filter_aktif = !empty($filter_tahun);
 
                 </div>
             </form>
+
+            <div class="alert mt-3 mb-0"
+                 style="background:#e8f8ee;border:1px solid #b2dfcc;border-radius:8px;color:#1a6b3a;font-size:13px;">
+                <i class="bi bi-info-circle me-2"></i>
+                Status gizi dihitung dari TB, BB, lingkar kepala, dan lingkar lengan. Semua indikator wajib diisi.
+            </div>
 
             <script>
             function hitungUmur() {
@@ -235,6 +256,7 @@ $filter_aktif = !empty($filter_tahun);
                             <th>#</th>
                             <th>Nama Bayi</th>
                             <th>Nama Ortu</th>
+                            <th>NIK Ortu</th>
                             <th>Tgl Lahir</th>
                             <th>Umur</th>
                             <th>JK</th>
@@ -243,6 +265,8 @@ $filter_aktif = !empty($filter_tahun);
                             <th>Lkr. Kepala</th>
                             <th>Lkr. Lengan</th>
                             <th>Status</th>
+                            <th>Status Verifikasi</th>
+                            <th>Catatan KPM</th>
                             <th>Posyandu</th>
                             <th>Bulan</th>
                             <th>Tahun</th>
@@ -265,6 +289,7 @@ $filter_aktif = !empty($filter_tahun);
                             <td><?= $no++ ?></td>
                             <td><strong><?= htmlspecialchars($row['nama_bayi']) ?></strong></td>
                             <td><?= htmlspecialchars($row['nama_ortu']) ?></td>
+                            <td><?= htmlspecialchars($row['nik_ortu'] ?? '-') ?></td>
                             <td><?= date('d/m/Y', strtotime($row['tanggal_lahir'])) ?></td>
                             <td><?= $row['umur_bulan'] ?> bln</td>
                             <td><?= $row['jenis_kelamin'] === 'L' ? 'Laki-laki' : 'Perempuan' ?></td>
@@ -276,6 +301,18 @@ $filter_aktif = !empty($filter_tahun);
                                 <span class="badge-status <?= $badge ?>">
                                     <?= ucfirst($row['status_gizi']) ?>
                                 </span>
+                            </td>
+                            <td>
+                                <?php if (($row['status_verifikasi_revisi'] ?? '') === 'pending'): ?>
+                                <span class="badge-status badge-beresiko">Perlu Revisi</span>
+                                <?php else: ?>
+                                -
+                                <?php endif; ?>
+                            </td>
+                            <td style="min-width:220px;">
+                                <?= !empty($row['catatan_revisi'])
+                                    ? htmlspecialchars($row['catatan_revisi'])
+                                    : '-' ?>
                             </td>
                             <td><?= htmlspecialchars($row['nama_posyandu']) ?></td>
                             <td><?= $bulan_list[(int)$row['bulan_pencatatan']] ?? '-' ?></td>
@@ -299,7 +336,7 @@ $filter_aktif = !empty($filter_tahun);
                         else:
                         ?>
                         <tr>
-                            <td colspan="14" class="text-center text-muted py-4">
+                            <td colspan="17" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox fs-4 d-block mb-2"></i>
                                 <?= !empty($tbl_tahun)
                                     ? 'Tidak ada data untuk tahun '.$tbl_tahun

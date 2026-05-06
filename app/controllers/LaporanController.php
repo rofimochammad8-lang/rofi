@@ -192,6 +192,11 @@ switch ($act) {
     // KELOLA LAPORAN
     // ----------------------------------------
     case 'laporan':
+        $bulan_list = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
         $data_laporan = mysqli_query($conn,
             "SELECT l.*, p.nama_posyandu, t.tahun
              FROM laporan l
@@ -211,9 +216,10 @@ switch ($act) {
             $isi         = trim($_POST['isi']);
             $id_posyandu = $_POST['id_posyandu'];
             $id_tahun    = $_POST['id_tahun'];
+            $bulan       = (int) ($_POST['bulan_pencatatan'] ?? 0);
 
-            $query = "INSERT INTO laporan (judul, isi, id_posyandu, id_tahun, status)
-                      VALUES ('$judul', '$isi', '$id_posyandu', '$id_tahun', 'dikirim')";
+            $query = "INSERT INTO laporan (judul, isi, id_posyandu, id_tahun, bulan_pencatatan, status)
+                      VALUES ('$judul', '$isi', '$id_posyandu', '$id_tahun', '$bulan', 'dikirim')";
 
             if (mysqli_query($conn, $query)) {
                 header("Location: index.php?page=kelurahan&act=laporan&msg=kirim_sukses");
@@ -236,6 +242,13 @@ switch ($act) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id_posyandu = $_POST['id_posyandu'];
             $id_tahun    = $_POST['id_tahun'];
+            $bulan       = (int) ($_POST['bulan_pencatatan'] ?? 0);
+            $bulan_list = [
+                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+            ];
+            $nama_bulan = $bulan_list[$bulan] ?? '';
 
             $info_posyandu = mysqli_fetch_assoc(
                 mysqli_query($conn, "SELECT * FROM posyandu WHERE id = '$id_posyandu'")
@@ -250,6 +263,7 @@ switch ($act) {
                  FROM balita
                  WHERE id_posyandu = '$id_posyandu'
                  AND id_tahun = '$id_tahun'
+                 AND bulan_pencatatan = '$bulan'
                  GROUP BY status_gizi"
             );
 
@@ -269,6 +283,7 @@ switch ($act) {
 
             $isi  = "LAPORAN DATA STUNTING\n";
             $isi .= "Posyandu : $nama_posyandu ($nama_dusun)\n";
+            $isi .= "Bulan    : $nama_bulan\n";
             $isi .= "Tahun    : $tahun\n";
             $isi .= "========================================\n\n";
             $isi .= "REKAPITULASI DATA:\n";
@@ -292,9 +307,9 @@ switch ($act) {
                 $isi .= "Tetap lakukan pemantauan rutin.\n";
             }
 
-            $judul = "Laporan Stunting - $nama_posyandu - $tahun";
-            $query = "INSERT INTO laporan (judul, isi, id_posyandu, id_tahun, status)
-                      VALUES ('$judul', '$isi', '$id_posyandu', '$id_tahun', 'dikirim')";
+            $judul = "Laporan Stunting - $nama_posyandu - $nama_bulan $tahun";
+            $query = "INSERT INTO laporan (judul, isi, id_posyandu, id_tahun, bulan_pencatatan, status)
+                      VALUES ('$judul', '$isi', '$id_posyandu', '$id_tahun', '$bulan', 'dikirim')";
 
             if (mysqli_query($conn, $query)) {
                 header("Location: index.php?page=kelurahan&act=laporan&msg=kirim_sukses");
@@ -342,7 +357,8 @@ switch ($act) {
                 COUNT(*) as total
              FROM balita
              WHERE id_tahun = '$id_tahun_lap'
-             AND id_posyandu = '$id_posyandu_lap'"
+             AND id_posyandu = '$id_posyandu_lap'
+             AND bulan_pencatatan = '{$laporan['bulan_pencatatan']}'"
         );
         $rekap = mysqli_fetch_assoc($rekap_query);
         $rekap['total']    = $rekap['total']    ?? 0;
@@ -358,6 +374,7 @@ switch ($act) {
              FROM balita
              WHERE id_tahun = '$id_tahun_lap'
              AND id_posyandu = '$id_posyandu_lap'
+             AND bulan_pencatatan = '{$laporan['bulan_pencatatan']}'
              AND status_gizi != 'normal'
              ORDER BY status_gizi DESC"
         );

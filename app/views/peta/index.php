@@ -72,6 +72,18 @@ require_once ROOT . '/app/views/layouts/header.php';
                         <?php endwhile; ?>
                     </select>
                 </div>
+                <div>
+                    <label class="form-label"><i class="bi bi-calendar-event me-1"></i>Filter Bulan</label>
+                    <select id="filterBulan" class="form-control" style="min-width:180px;">
+                        <option value="">Semua Bulan</option>
+                        <?php foreach ($semua_bulan as $nomor_bulan => $nama_bulan): ?>
+                        <option value="<?= $nomor_bulan ?>"
+                            <?= (string) $bulan_aktif === (string) $nomor_bulan ? 'selected' : '' ?>>
+                            <?= $nama_bulan ?>
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
                 <button id="btnFilter" class="btn"
                         style="background:#1a6b3a;color:#fff;border-radius:8px;font-weight:600;padding:9px 20px;">
                     <i class="bi bi-search me-1"></i>Tampilkan
@@ -139,7 +151,7 @@ legend.addTo(map);
 
 let markers = [];
 
-function loadPeta(id_tahun = '') {
+function loadPeta(id_tahun = '', bulan = '') {
     // Hapus marker lama
     markers.forEach(m => map.removeLayer(m));
     markers = [];
@@ -149,7 +161,20 @@ function loadPeta(id_tahun = '') {
     document.getElementById('statKuning').textContent = 0;
     document.getElementById('statMerah').textContent  = 0;
 
-    fetch(`index.php?page=peta&act=data_peta&id_tahun=${id_tahun}`)
+    const params = new URLSearchParams({
+        page: 'peta',
+        act: 'data_peta'
+    });
+
+    if (id_tahun) {
+        params.set('id_tahun', id_tahun);
+    }
+
+    if (bulan) {
+        params.set('bulan', bulan);
+    }
+
+    fetch(`index.php?${params.toString()}`)
         .then(res => res.json())
         .then(data => {
             let hijau = 0, kuning = 0, merah = 0;
@@ -210,17 +235,21 @@ function loadPeta(id_tahun = '') {
 }
 
 // Load awal
-loadPeta('<?= $id_tahun_aktif ?>');
+loadPeta('<?= $id_tahun_aktif ?>', '<?= $bulan_aktif ?>');
 
 // Tombol filter
 document.getElementById('btnFilter').addEventListener('click', function() {
-    loadPeta(document.getElementById('filterTahun').value);
+    loadPeta(
+        document.getElementById('filterTahun').value,
+        document.getElementById('filterBulan').value
+    );
 });
 
 // Tombol reset
 document.getElementById('btnReset').addEventListener('click', function() {
     document.getElementById('filterTahun').value = '';
-    loadPeta('');
+    document.getElementById('filterBulan').value = '';
+    loadPeta('', '');
 });
 </script>
 

@@ -105,6 +105,13 @@
     </style>
 </head>
 <body>
+<?php
+$bulan_list = [
+    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+];
+?>
 
 <!-- Tombol Aksi -->
 <div class="no-print">
@@ -139,6 +146,10 @@
             <tr>
                 <td>Posyandu</td><td>:</td>
                 <td><?= htmlspecialchars($laporan['nama_posyandu']) ?> — <?= htmlspecialchars($laporan['nama_dusun']) ?></td>
+            </tr>
+            <tr>
+                <td>Bulan</td><td>:</td>
+                <td><?= $bulan_list[(int) ($laporan['bulan_pencatatan'] ?? 0)] ?? '-' ?></td>
             </tr>
             <tr>
                 <td>Tahun</td><td>:</td>

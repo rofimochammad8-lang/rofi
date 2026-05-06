@@ -37,6 +37,15 @@ $id_posyandu_kader = $_SESSION['user']['id_posyandu'] ?? null;
                     </div>
                     <hr>
 
+                    <?php if (isset($_GET['msg']) && $_GET['msg'] === 'invalid_input'): ?>
+                    <div class="alert alert-warning alert-dismissible fade show"
+                         style="border-radius:10px;font-size:14px;">
+                        <i class="bi bi-exclamation-circle me-2"></i>
+                        <?= htmlspecialchars($_GET['error'] ?? 'Semua indikator wajib diisi dengan benar.') ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <?php endif; ?>
+
                     <form method="POST" action="index.php?page=kader&act=update_balita">
                         <input type="hidden" name="id"           value="<?= $balita['id'] ?>">
                         <input type="hidden" name="filter_tahun" value="<?= $filter_tahun ?>">
@@ -53,6 +62,12 @@ $id_posyandu_kader = $_SESSION['user']['id_posyandu'] ?? null;
                                 <label class="form-label">Nama Orang Tua</label>
                                 <input type="text" name="nama_ortu" class="form-control"
                                        value="<?= htmlspecialchars($balita['nama_ortu']) ?>" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">NIK Orang Tua</label>
+                                <input type="text" name="nik_ortu" class="form-control"
+                                       value="<?= htmlspecialchars($balita['nik_ortu'] ?? '') ?>" required>
                             </div>
 
                             <div class="col-md-4">
@@ -95,16 +110,14 @@ $id_posyandu_kader = $_SESSION['user']['id_posyandu'] ?? null;
                                 <label class="form-label">Lingkar Kepala (cm)</label>
                                 <input type="number" step="0.1" name="lingkar_kepala"
                                        class="form-control"
-                                       value="<?= $balita['lingkar_kepala'] ?>">
-                                <small class="text-muted">Opsional</small>
+                                       value="<?= $balita['lingkar_kepala'] ?>" min="0.1" required>
                             </div>
 
                             <div class="col-md-3">
                                 <label class="form-label">Lingkar Lengan (cm)</label>
                                 <input type="number" step="0.1" name="lingkar_lengan"
                                        class="form-control"
-                                       value="<?= $balita['lingkar_lengan'] ?>">
-                                <small class="text-muted">Opsional</small>
+                                       value="<?= $balita['lingkar_lengan'] ?>" min="0.1" required>
                             </div>
 
                             <div class="col-md-6">
@@ -127,7 +140,7 @@ $id_posyandu_kader = $_SESSION['user']['id_posyandu'] ?? null;
                                     border-radius:8px;color:#1a6b3a;font-size:13px;">
                             <i class="bi bi-info-circle me-2"></i>
                             Status gizi akan dihitung <strong>otomatis</strong> berdasarkan
-                            TB, BB, lingkar kepala, dan lingkar lengan yang diisi.
+                            TB, BB, lingkar kepala, dan lingkar lengan. Semua indikator wajib diisi.
                         </div>
 
                         <div class="d-flex gap-2 mt-4">
