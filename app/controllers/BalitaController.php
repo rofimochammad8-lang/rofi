@@ -193,7 +193,6 @@ switch ($act) {
             if ($filter_tahun) $redirect .= "&tahun=$filter_tahun";
 
             if (mysqli_query($conn, $query)) {
-                mysqli_query($conn, "DELETE FROM stunting WHERE id_balita = '$id' AND status_verifikasi = 'pending'");
                 header("Location: $redirect");
             } else {
                 header("Location: index.php?page=kader&act=balita&msg=gagal");
@@ -302,6 +301,7 @@ switch ($act) {
             if ($filter_tahun) $redirect .= "&tahun=$filter_tahun";
 
             if (mysqli_query($conn, $query)) {
+                mysqli_query($conn, "DELETE FROM stunting WHERE id_balita = '$id' AND status_verifikasi = 'pending'");
                 header("Location: $redirect");
             } else {
                 header("Location: index.php?page=kader&act=balita&msg=gagal");
