@@ -6,6 +6,15 @@
 require_once ROOT . '/app/config/database.php';
 require_once ROOT . '/app/config/status_gizi.php';
 
+function redirectBalitaFormError($message, $filter_tahun = '') {
+    $redirect = "Location: index.php?page=kader&act=balita&msg=invalid_input&error=" . urlencode($message);
+    if ($filter_tahun !== '') {
+        $redirect .= "&tahun=" . urlencode($filter_tahun);
+    }
+    header($redirect);
+    exit;
+}
+
 $act = isset($_GET['act']) ? $_GET['act'] : 'dashboard';
 
 // Ambil id_posyandu dari session kader
@@ -74,13 +83,40 @@ switch ($act) {
         }
 
         $data_balita = mysqli_query($conn,
-            "SELECT b.*, p.nama_posyandu, t.tahun
+            "SELECT b.*, p.nama_posyandu, t.tahun,
+                    sp.id as stunting_pending_id,
+                    sp.status_verifikasi as status_verifikasi_revisi,
+                    sp.catatan as catatan_revisi
              FROM balita b
              JOIN posyandu p ON b.id_posyandu = p.id
              JOIN tahun t ON b.id_tahun = t.id
+             LEFT JOIN (
+                 SELECT s1.*
+                 FROM stunting s1
+                 INNER JOIN (
+                     SELECT id_balita, MAX(id) AS latest_id
+                     FROM stunting
+                     WHERE status_verifikasi = 'pending'
+                     GROUP BY id_balita
+                 ) s2 ON s1.id = s2.latest_id
+             ) sp ON sp.id_balita = b.id
              $where_tabel
              ORDER BY b.created_at DESC"
         );
+
+        $total_revisi = mysqli_fetch_assoc(
+            mysqli_query($conn,
+                "SELECT COUNT(*) as total
+                 FROM balita b
+                 INNER JOIN (
+                     SELECT id_balita, MAX(id) AS latest_id
+                     FROM stunting
+                     WHERE status_verifikasi = 'pending'
+                     GROUP BY id_balita
+                 ) sp ON sp.id_balita = b.id
+                 WHERE b.id_posyandu = '$id_posyandu_kader'"
+            )
+        )['total'];
 
         $data_tahun = mysqli_query($conn, "SELECT * FROM tahun ORDER BY tahun DESC");
 
@@ -94,6 +130,7 @@ switch ($act) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nama_bayi        = trim($_POST['nama_bayi']);
             $nama_ortu        = trim($_POST['nama_ortu']);
+            $nik_ortu         = trim($_POST['nik_ortu'] ?? '');
             $tgl_lahir        = $_POST['tanggal_lahir'];
             $umur_bulan       = (int)$_POST['umur_bulan'];
             $jk               = $_POST['jenis_kelamin'];
@@ -105,11 +142,27 @@ switch ($act) {
             $filter_tahun     = $_POST['filter_tahun'] ?? '';
             $tahun_input      = (int)$filter_tahun;
 
+            if ($nik_ortu === '') {
+                redirectBalitaFormError('NIK orang tua wajib diisi.', $filter_tahun);
+            }
+
+            if ($lingkar_kepala === null || $lingkar_kepala <= 0) {
+                redirectBalitaFormError('Lingkar kepala wajib diisi dengan angka lebih dari 0.', $filter_tahun);
+            }
+
+            if ($lingkar_lengan === null || $lingkar_lengan <= 0) {
+                redirectBalitaFormError('Lingkar lengan wajib diisi dengan angka lebih dari 0.', $filter_tahun);
+            }
+
             // Hitung status gizi otomatis
             $status_gizi = hitungStatusGizi(
                 $jk, $umur_bulan, $tinggi_badan,
                 $berat_badan, $lingkar_lengan, $lingkar_kepala
             );
+
+            if ($status_gizi === null) {
+                redirectBalitaFormError('Status gizi tidak bisa dihitung. Pastikan semua indikator terisi lengkap.', $filter_tahun);
+            }
 
             // Cari atau buat tahun otomatis
             $cek_tahun = mysqli_fetch_assoc(
@@ -128,11 +181,11 @@ switch ($act) {
             $id_posyandu = $_SESSION['user']['id_posyandu'];
 
             $query = "INSERT INTO balita
-                        (nama_bayi, nama_ortu, tanggal_lahir, umur_bulan, jenis_kelamin,
+                        (nama_bayi, nama_ortu, nik_ortu, tanggal_lahir, umur_bulan, jenis_kelamin,
                          berat_badan, tinggi_badan, lingkar_kepala, lingkar_lengan,
                          status_gizi, bulan_pencatatan, id_posyandu, id_tahun)
                       VALUES
-                        ('$nama_bayi', '$nama_ortu', '$tgl_lahir', '$umur_bulan', '$jk',
+                        ('$nama_bayi', '$nama_ortu', '$nik_ortu', '$tgl_lahir', '$umur_bulan', '$jk',
                          '$berat_badan', '$tinggi_badan', $lk, $ll,
                          '$status_gizi', '$bulan_pencatatan', '$id_posyandu', '$id_tahun')";
 
@@ -140,6 +193,7 @@ switch ($act) {
             if ($filter_tahun) $redirect .= "&tahun=$filter_tahun";
 
             if (mysqli_query($conn, $query)) {
+                mysqli_query($conn, "DELETE FROM stunting WHERE id_balita = '$id' AND status_verifikasi = 'pending'");
                 header("Location: $redirect");
             } else {
                 header("Location: index.php?page=kader&act=balita&msg=gagal");
@@ -174,6 +228,7 @@ switch ($act) {
             $id               = $_POST['id'];
             $nama_bayi        = trim($_POST['nama_bayi']);
             $nama_ortu        = trim($_POST['nama_ortu']);
+            $nik_ortu         = trim($_POST['nik_ortu'] ?? '');
             $tgl_lahir        = $_POST['tanggal_lahir'];
             $umur_bulan       = (int)$_POST['umur_bulan'];
             $jk               = $_POST['jenis_kelamin'];
@@ -184,17 +239,58 @@ switch ($act) {
             $bulan_pencatatan = (int)$_POST['bulan_pencatatan'];
             $filter_tahun     = $_POST['filter_tahun'] ?? '';
 
+            if ($nik_ortu === '') {
+                $redirect = "Location: index.php?page=kader&act=edit_balita&id=$id&msg=invalid_input&error=" .
+                    urlencode('NIK orang tua wajib diisi.');
+                if ($filter_tahun !== '') {
+                    $redirect .= "&tahun=" . urlencode($filter_tahun);
+                }
+                header($redirect);
+                exit;
+            }
+
+            if ($lingkar_kepala === null || $lingkar_kepala <= 0) {
+                $redirect = "Location: index.php?page=kader&act=edit_balita&id=$id&msg=invalid_input&error=" .
+                    urlencode('Lingkar kepala wajib diisi dengan angka lebih dari 0.');
+                if ($filter_tahun !== '') {
+                    $redirect .= "&tahun=" . urlencode($filter_tahun);
+                }
+                header($redirect);
+                exit;
+            }
+
+            if ($lingkar_lengan === null || $lingkar_lengan <= 0) {
+                $redirect = "Location: index.php?page=kader&act=edit_balita&id=$id&msg=invalid_input&error=" .
+                    urlencode('Lingkar lengan wajib diisi dengan angka lebih dari 0.');
+                if ($filter_tahun !== '') {
+                    $redirect .= "&tahun=" . urlencode($filter_tahun);
+                }
+                header($redirect);
+                exit;
+            }
+
             // Hitung status gizi otomatis
             $status_gizi = hitungStatusGizi(
                 $jk, $umur_bulan, $tinggi_badan,
                 $berat_badan, $lingkar_lengan, $lingkar_kepala
             );
 
+            if ($status_gizi === null) {
+                $redirect = "Location: index.php?page=kader&act=edit_balita&id=$id&msg=invalid_input&error=" .
+                    urlencode('Status gizi tidak bisa dihitung. Pastikan semua indikator terisi lengkap.');
+                if ($filter_tahun !== '') {
+                    $redirect .= "&tahun=" . urlencode($filter_tahun);
+                }
+                header($redirect);
+                exit;
+            }
+
             $lk = $lingkar_kepala ? "'$lingkar_kepala'" : "NULL";
             $ll = $lingkar_lengan ? "'$lingkar_lengan'" : "NULL";
 
             $query = "UPDATE balita SET
                         nama_bayi='$nama_bayi', nama_ortu='$nama_ortu',
+                        nik_ortu='$nik_ortu',
                         tanggal_lahir='$tgl_lahir', umur_bulan='$umur_bulan',
                         jenis_kelamin='$jk', berat_badan='$berat_badan',
                         tinggi_badan='$tinggi_badan', lingkar_kepala=$lk,

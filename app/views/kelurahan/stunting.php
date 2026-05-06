@@ -40,7 +40,7 @@ $bulan_list = [
         <?php endif; ?>
 
         <div class="card-table">
-            <h6 class="mb-3"><i class="bi bi-clipboard2-pulse me-2"></i>Data Menunggu Persetujuan</h6>
+            <h6 class="mb-3"><i class="bi bi-clipboard2-pulse me-2"></i>Data Balita</h6>
             <div class="table-responsive">
                 <table class="table table-hover" style="font-size:13px;">
                     <thead>
@@ -57,7 +57,6 @@ $bulan_list = [
                             <th>Status Gizi</th>
                             <th>Bulan</th>
                             <th>Tahun</th>
-                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -93,28 +92,13 @@ $bulan_list = [
                             </td>
                             <td><?= $bulan_list[(int)$row['bulan_pencatatan']] ?? '-' ?></td>
                             <td><?= $row['tahun'] ?></td>
-                            <td style="white-space:nowrap;">
-                                <a href="index.php?page=kelurahan&act=setujui_stunting&id=<?= $row['id'] ?>"
-                                   class="btn btn-sm mb-1"
-                                   style="background:#e8f8ee;color:#1a6b3a;border-radius:6px;"
-                                   onclick="return confirm('Setujui data ini?')">
-                                    <i class="bi bi-check-lg"></i> Setujui
-                                </a>
-                                <button class="btn btn-sm"
-                                        style="background:#ffeaea;color:#c0392b;border-radius:6px;"
-                                        data-bs-toggle="modal" data-bs-target="#modalTolak"
-                                        data-id="<?= $row['id'] ?>"
-                                        data-nama="<?= htmlspecialchars($row['nama_bayi']) ?>">
-                                    <i class="bi bi-x-lg"></i> Tolak
-                                </button>
-                            </td>
                         </tr>
                         <?php
                             endwhile;
                         else:
                         ?>
                         <tr>
-                            <td colspan="13" class="text-center text-muted py-4">
+                            <td colspan="12" class="text-center text-muted py-4">
                                 <i class="bi bi-check-circle fs-4 d-block mb-2 text-success"></i>
                                 Tidak ada data menunggu persetujuan
                             </td>
@@ -127,46 +111,7 @@ $bulan_list = [
 
     </div>
 </div>
-
-<!-- Modal Tolak -->
-<div class="modal fade" id="modalTolak" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius:12px;">
-            <div class="modal-header" style="background:#c0392b;border-radius:12px 12px 0 0;">
-                <h6 class="modal-title text-white">Tolak Data Stunting</h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="POST" action="index.php?page=kelurahan&act=tolak_stunting">
-                <div class="modal-body">
-                    <input type="hidden" name="id" id="tolakId">
-                    <p style="font-size:14px;">Data: <strong id="tolakNama"></strong></p>
-                    <div class="mb-3">
-                        <label class="form-label">Alasan Penolakan</label>
-                        <textarea name="catatan" class="form-control" rows="3"
-                                  placeholder="Tuliskan alasan..." required></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-sm"
-                            style="background:#f0f0f0;color:#555;border-radius:8px;"
-                            data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-sm"
-                            style="background:#c0392b;color:#fff;border-radius:8px;">
-                        <i class="bi bi-x-circle me-1"></i>Tolak
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <script>
-document.getElementById('modalTolak').addEventListener('show.bs.modal', function(e) {
-    const btn = e.relatedTarget;
-    document.getElementById('tolakId').value         = btn.getAttribute('data-id');
-    document.getElementById('tolakNama').textContent = btn.getAttribute('data-nama');
-});
-
 // Polling setiap 5 detik - reload hanya jika ada data baru
 var jumlahSekarang = <?= mysqli_num_rows($data_stunting) ?>;
 setInterval(function() {

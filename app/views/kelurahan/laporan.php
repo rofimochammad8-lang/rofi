@@ -94,6 +94,16 @@ require_once ROOT . '/app/views/layouts/header.php';
                             </select>
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label">Bulan</label>
+                            <select name="bulan_pencatatan" class="form-control" required>
+                                <option value="">-- Pilih Bulan --</option>
+                                <?php foreach ($bulan_list as $nomor => $nama_bulan): ?>
+                                <option value="<?= $nomor ?>"><?= $nama_bulan ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
                         <div class="mb-4">
                             <label class="form-label">Isi Laporan / Penanganan</label>
                             <textarea name="isi" class="form-control" rows="5"
@@ -122,6 +132,7 @@ require_once ROOT . '/app/views/layouts/header.php';
                                     <th>#</th>
                                     <th>Judul</th>
                                     <th>Posyandu</th>
+                                    <th>Bulan</th>
                                     <th>Tahun</th>
                                     <th>Status</th>
                                     <th>Tanggal</th>
@@ -138,6 +149,7 @@ require_once ROOT . '/app/views/layouts/header.php';
                                     <td><?= $no++ ?></td>
                                     <td><strong><?= htmlspecialchars($row['judul']) ?></strong></td>
                                     <td><?= htmlspecialchars($row['nama_posyandu']) ?></td>
+                                    <td><?= $bulan_list[(int) ($row['bulan_pencatatan'] ?? 0)] ?? '-' ?></td>
                                     <td><?= $row['tahun'] ?></td>
                                     <td>
                                         <?php if ($row['status'] === 'dibaca'): ?>
@@ -178,7 +190,7 @@ require_once ROOT . '/app/views/layouts/header.php';
                                 else:
                                 ?>
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">
+                                    <td colspan="8" class="text-center text-muted py-4">
                                         <i class="bi bi-inbox fs-4 d-block mb-2"></i>
                                         Belum ada laporan dikirim
                                     </td>
@@ -253,6 +265,15 @@ require_once ROOT . '/app/views/layouts/header.php';
                             ?>
                             <option value="<?= $t['id'] ?>"><?= $t['tahun'] ?></option>
                             <?php endwhile; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Pilih Bulan</label>
+                        <select name="bulan_pencatatan" class="form-control" required>
+                            <option value="">-- Pilih Bulan --</option>
+                            <?php foreach ($bulan_list as $nomor => $nama_bulan): ?>
+                            <option value="<?= $nomor ?>"><?= $nama_bulan ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                 </div>

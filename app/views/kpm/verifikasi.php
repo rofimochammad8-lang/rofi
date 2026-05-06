@@ -54,6 +54,7 @@ $bulan_list = [
                             <th>#</th>
                             <th>Nama Bayi</th>
                             <th>Nama Ortu</th>
+                            <th>NIK Ortu</th>
                             <th>Posyandu</th>
                             <th>Tgl Lahir</th>
                             <th>Umur</th>
@@ -84,6 +85,7 @@ $bulan_list = [
                             <td><?= $no++ ?></td>
                             <td><strong><?= htmlspecialchars($row['nama_bayi']) ?></strong></td>
                             <td><?= htmlspecialchars($row['nama_ortu']) ?></td>
+                            <td><?= htmlspecialchars($row['nik_ortu'] ?? '-') ?></td>
                             <td><?= htmlspecialchars($row['nama_posyandu']) ?></td>
                             <td><?= date('d/m/Y', strtotime($row['tanggal_lahir'])) ?></td>
                             <td><?= $row['umur_bulan'] ?> bln</td>
@@ -122,7 +124,7 @@ $bulan_list = [
                         else:
                         ?>
                         <tr>
-                            <td colspan="15" class="text-center text-muted py-4">
+                            <td colspan="16" class="text-center text-muted py-4">
                                 <i class="bi bi-check-circle fs-4 d-block mb-2 text-success"></i>
                                 Semua data balita sudah diverifikasi
                             </td>
