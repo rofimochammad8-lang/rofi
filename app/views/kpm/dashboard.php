@@ -48,15 +48,6 @@ $bulan_list = [
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="stat-icon blue"><i class="bi bi-check2-circle"></i></div>
-                    <div class="stat-info">
-                        <div class="number"><?= $total_disetujui ?></div>
-                        <div class="label">Disetujui Kelurahan</div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Notifikasi -->
