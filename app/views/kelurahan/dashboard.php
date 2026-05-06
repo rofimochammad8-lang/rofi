@@ -32,15 +32,6 @@ $bulan_list = [
             </div>
             <div class="col-md-3">
                 <div class="stat-card">
-                    <div class="stat-icon yellow"><i class="bi bi-hourglass-split"></i></div>
-                    <div class="stat-info">
-                        <div class="number"><?= $total_menunggu ?></div>
-                        <div class="label">Menunggu Persetujuan</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
                     <div class="stat-icon red"><i class="bi bi-heartbreak"></i></div>
                     <div class="stat-info">
                         <div class="number"><?= $total_stunting ?></div>
@@ -58,18 +49,6 @@ $bulan_list = [
                 </div>
             </div>
         </div>
-
-        <!-- Notifikasi -->
-        <?php if ($total_menunggu > 0): ?>
-        <div class="alert mb-4"
-             style="background:#fff8e1;border:1px solid #ffe082;border-radius:10px;color:#b8860b;">
-            <i class="bi bi-exclamation-circle-fill me-2"></i>
-            Ada <strong><?= $total_menunggu ?> data</strong> menunggu persetujuan kamu.
-            <a href="index.php?page=kelurahan&act=stunting" class="ms-2 fw-bold" style="color:#b8860b;">
-                Setujui Sekarang →
-            </a>
-        </div>
-        <?php endif; ?>
 
         <!-- Tabel Terverifikasi -->
         <div class="card-table">

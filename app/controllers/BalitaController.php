@@ -84,7 +84,7 @@ switch ($act) {
 
         $data_balita = mysqli_query($conn,
             "SELECT b.*, p.nama_posyandu, t.tahun,
-                    sp.id as stunting_pending_id,
+                    sp.id as stunting_status_id,
                     sp.status_verifikasi as status_verifikasi_revisi,
                     sp.catatan as catatan_revisi
              FROM balita b
@@ -96,7 +96,6 @@ switch ($act) {
                  INNER JOIN (
                      SELECT id_balita, MAX(id) AS latest_id
                      FROM stunting
-                     WHERE status_verifikasi = 'pending'
                      GROUP BY id_balita
                  ) s2 ON s1.id = s2.latest_id
              ) sp ON sp.id_balita = b.id

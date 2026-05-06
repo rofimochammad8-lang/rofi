@@ -303,8 +303,15 @@ $filter_aktif = !empty($filter_tahun);
                                 </span>
                             </td>
                             <td>
-                                <?php if (($row['status_verifikasi_revisi'] ?? '') === 'pending'): ?>
+                                <?php
+                                $statusVerifikasi = $row['status_verifikasi_revisi'] ?? '';
+                                if ($statusVerifikasi === 'pending'):
+                                ?>
                                 <span class="badge-status badge-beresiko">Perlu Revisi</span>
+                                <?php elseif ($statusVerifikasi === 'terverifikasi'): ?>
+                                <span class="badge-status badge-normal">Terverifikasi KPM</span>
+                                <?php elseif ($statusVerifikasi === 'disetujui'): ?>
+                                <span class="badge-status badge-normal">Disetujui</span>
                                 <?php else: ?>
                                 -
                                 <?php endif; ?>
