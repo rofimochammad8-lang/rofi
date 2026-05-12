@@ -142,7 +142,7 @@ switch ($act) {
             $tahun_input      = (int)$filter_tahun;
 
             if ($nik_ortu === '') {
-                redirectBalitaFormError('NIK orang tua wajib diisi.', $filter_tahun);
+                redirectBalitaFormError('NIK wajib diisi.', $filter_tahun);
             }
 
             if ($lingkar_kepala === null || $lingkar_kepala <= 0) {
@@ -239,7 +239,7 @@ switch ($act) {
 
             if ($nik_ortu === '') {
                 $redirect = "Location: index.php?page=kader&act=edit_balita&id=$id&msg=invalid_input&error=" .
-                    urlencode('NIK orang tua wajib diisi.');
+                    urlencode('NIK wajib diisi.');
                 if ($filter_tahun !== '') {
                     $redirect .= "&tahun=" . urlencode($filter_tahun);
                 }

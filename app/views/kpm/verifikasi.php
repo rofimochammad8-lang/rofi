@@ -54,7 +54,7 @@ $bulan_list = [
                             <th>#</th>
                             <th>Nama Bayi</th>
                             <th>Nama Ortu</th>
-                            <th>NIK Ortu</th>
+                            <th>NIK</th>
                             <th>Posyandu</th>
                             <th>Tgl Lahir</th>
                             <th>Umur</th>
