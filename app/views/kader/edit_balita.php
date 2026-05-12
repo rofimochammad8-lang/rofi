@@ -65,7 +65,7 @@ $id_posyandu_kader = $_SESSION['user']['id_posyandu'] ?? null;
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label">NIK Orang Tua</label>
+                                <label class="form-label">NIK</label>
                                 <input type="text" name="nik_ortu" class="form-control"
                                        value="<?= htmlspecialchars($balita['nik_ortu'] ?? '') ?>" required>
                             </div>

@@ -119,7 +119,7 @@ $filter_aktif = !empty($filter_tahun);
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label">NIK Orang Tua</label>
+                        <label class="form-label">NIK</label>
                         <input type="text" name="nik_ortu" class="form-control"
                                placeholder="Nomor Induk Kependudukan" required>
                     </div>
@@ -256,7 +256,7 @@ $filter_aktif = !empty($filter_tahun);
                             <th>#</th>
                             <th>Nama Bayi</th>
                             <th>Nama Ortu</th>
-                            <th>NIK Ortu</th>
+                            <th>NIK</th>
                             <th>Tgl Lahir</th>
                             <th>Umur</th>
                             <th>JK</th>
